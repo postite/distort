@@ -1,0 +1,3 @@
+-D hx-vector2d=0.0.2
+# @install: lix --silent download "gh://github.com/markknol/hx-vector2d#2ee0471898cf68b8f33c1fe85ff3092cc6bf2a15" into hx-vector2d/0.0.2/github/2ee0471898cf68b8f33c1fe85ff3092cc6bf2a15
+-cp ${HAXE_LIBCACHE}/hx-vector2d/0.0.2/github/2ee0471898cf68b8f33c1fe85ff3092cc6bf2a15/src

@@ -1,0 +1,10 @@
+-cp src
+-cp lib
+-D analyzer-optimize
+#-main Main
+-main Render
+-lib jQueryExtern
+-lib tink_core
+-lib postite_droz
+-debug
+--js www/disturt.js

@@ -1,0 +1,4 @@
+-D hxClipper=0.0.0
+# @install: lix --silent download "gh://github.com/azrafe7/hxClipper#393fbee5fd1cf1f38b6465a4181444cad8e053a1" into hxClipper/0.0.0/github/393fbee5fd1cf1f38b6465a4181444cad8e053a1
+#-cp ${HAXE_LIBCACHE}/hxClipper/0.0.0/github/393fbee5fd1cf1f38b6465a4181444cad8e053a1/src
+-cp /Users/ut/Documents/LAB/localLibs/hxClipper/src

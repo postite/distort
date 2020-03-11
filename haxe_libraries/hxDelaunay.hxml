@@ -1,0 +1,3 @@
+-D hxDelaunay=0.0.0
+# @install: lix --silent download "gh://github.com/azrafe7/hxDelaunay#8bae33c3beaa14673cef9146325c4411579a6c74" into hxDelaunay/0.0.0/github/8bae33c3beaa14673cef9146325c4411579a6c74
+-cp ${HAXE_LIBCACHE}/hxDelaunay/0.0.0/github/8bae33c3beaa14673cef9146325c4411579a6c74
