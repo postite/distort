@@ -57,7 +57,7 @@ class DragPoints {
 
    public function anchors(parent:Element,bounds:Bounds):DragPoints{
       this.parent=parent;
-      this.bounds=bounds.Log("bounds");
+      this.bounds=bounds;
       generateGuides(bounds);
       drawGuides();
       st=new SignalTrigger();
@@ -65,7 +65,15 @@ class DragPoints {
       return this;
    }
 
-   public function distort(elem:Element){
+   public function show(oui:Bool):DragPoints{
+      if(oui)
+         showguides();
+      else 
+         hideguides();
+      return this;
+   }
+
+   public function distort(elem:Element):DragPoints{
 
       if (this.bounds==null)
       this.anchors(cast elem.parentNode,boundsof(elem));
@@ -77,6 +85,7 @@ class DragPoints {
          );
 
       this.signal.handle(p->this.modify(transform,p));
+      return this;
    }
 
    private function boundsof(elem:Element){
@@ -86,7 +95,7 @@ class DragPoints {
 			top:0,
 			width:elem.style.width.parseInt(),
 			height:elem.style.height.parseInt()
-         }.Log("bounds");
+         };
    }
    public  function modify(transform:PerspectiveDistort,anchor:DragAnchor):DragAnchor{
       {
@@ -109,10 +118,10 @@ class DragPoints {
 				transform.update(); // update the perspective transform
 				//elem.style.display = "block"; // show the element
 		  	}else{
-			  transform.checkError().Log("err");
+			  transform.checkError();
 				//elem.style.display = "none"; // hide the element
 		  	}
-			return anchor.Log();
+			return anchor;
    }
    }
 
@@ -128,16 +137,20 @@ class DragPoints {
      
    }
 
+
+   function hideguides(){
+      for ( a in guidesElements)
+         a.style.display="none";
+   }
+   function showguides(){
+      for ( a in guidesElements)
+         a.style.display="block";
+   }
+   var guidesElements:Array<Element>;
    function drawGuides() {
+      guidesElements=[];
       trace( "draguides");
       for ( guide in guides) {
-        
-        
-        
-        
-        
-         
-         
           var point=
           switch(guide){
               case TopLeft(point):point;
@@ -160,10 +173,8 @@ class DragPoints {
           can.addEventListener("mousedown",onMouseDown.bind(_,guide));
           //can.addEventListener("mouseup",onMouseUp.bind(_,can));
           //can.addEventListener("mouseout",onMouseUp.bind(_,can));
-         doc.body.appendChild(can);
-
-
-         
+          guidesElements.push(can);
+          doc.body.appendChild(can); 
       }
 
    }

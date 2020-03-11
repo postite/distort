@@ -4,14 +4,11 @@
    "license": "MIT",
    "tags": ["js","drawing","geom","utils"],
    "description": "",
-   "version": "0.0.1",
+   "version": "0.0.2",
    "classPath": "src/",
    "releasenote": "init",
    "contributors": ["postite"],
    "dependencies": {
-       
-       "tink_core":"",
-       "hxClipper":"https://github.com/postite/hxClipper.git",
-       "hx-vector2d":"git:https://github.com/markknol/hx-vector2d.git"
+       "tink_core":""
    }
 }

@@ -51,11 +51,19 @@ DragPoints.__name__ = true;
 DragPoints.prototype = {
 	anchors: function(parent,bounds) {
 		this.parent = parent;
-		this.bounds = Debug.Log(bounds,"bounds",{ fileName : "src/PerspectiveDistort.hx", lineNumber : 60, className : "DragPoints", methodName : "anchors"});
+		this.bounds = bounds;
 		this.generateGuides(bounds);
 		this.drawGuides();
 		this.st = new tink_core_SignalTrigger();
 		this.signal = this.st;
+		return this;
+	}
+	,show: function(oui) {
+		if(oui) {
+			this.showguides();
+		} else {
+			this.hideguides();
+		}
 		return this;
 	}
 	,distort: function(elem) {
@@ -67,10 +75,11 @@ DragPoints.prototype = {
 		this.signal.handle(function(p) {
 			return _gthis.modify(transform,p);
 		});
+		return this;
 	}
 	,boundsof: function(elem) {
-		haxe_Log.trace(elem,{ fileName : "src/PerspectiveDistort.hx", lineNumber : 83, className : "DragPoints", methodName : "boundsof"});
-		return Debug.Log({ left : 0, top : 0, width : Std.parseInt(elem.style.width), height : Std.parseInt(elem.style.height)},"bounds",{ fileName : "src/PerspectiveDistort.hx", lineNumber : 84, className : "DragPoints", methodName : "boundsof"});
+		haxe_Log.trace(elem,{ fileName : "lib/PerspectiveDistort.hx", lineNumber : 92, className : "DragPoints", methodName : "boundsof"});
+		return { left : 0, top : 0, width : Std.parseInt(elem.style.width), height : Std.parseInt(elem.style.height)};
 	}
 	,modify: function(transform,anchor) {
 		switch(anchor._hx_index) {
@@ -98,9 +107,9 @@ DragPoints.prototype = {
 		if(transform.checkError() == 0) {
 			transform.update();
 		} else {
-			Debug.Log(transform.checkError(),"err",{ fileName : "src/PerspectiveDistort.hx", lineNumber : 112, className : "DragPoints", methodName : "modify"});
+			transform.checkError();
 		}
-		return Debug.Log(anchor,null,{ fileName : "src/PerspectiveDistort.hx", lineNumber : 115, className : "DragPoints", methodName : "modify"});
+		return anchor;
 	}
 	,generateGuides: function(b) {
 		this.guides = [];
@@ -109,8 +118,27 @@ DragPoints.prototype = {
 		this.guides.push(DragAnchor.BottomRight(new DragPoint(b.left + b.width,b.top + b.height,this.defaultR)));
 		this.guides.push(DragAnchor.BottomLeft(new DragPoint(b.left,b.top + b.height,this.defaultR)));
 	}
+	,hideguides: function() {
+		var _g = 0;
+		var _g1 = this.guidesElements;
+		while(_g < _g1.length) {
+			var a = _g1[_g];
+			++_g;
+			a.style.display = "none";
+		}
+	}
+	,showguides: function() {
+		var _g = 0;
+		var _g1 = this.guidesElements;
+		while(_g < _g1.length) {
+			var a = _g1[_g];
+			++_g;
+			a.style.display = "block";
+		}
+	}
 	,drawGuides: function() {
-		haxe_Log.trace("draguides",{ fileName : "src/PerspectiveDistort.hx", lineNumber : 132, className : "DragPoints", methodName : "drawGuides"});
+		this.guidesElements = [];
+		haxe_Log.trace("draguides",{ fileName : "lib/PerspectiveDistort.hx", lineNumber : 152, className : "DragPoints", methodName : "drawGuides"});
 		var _g = 0;
 		var _g1 = this.guides;
 		while(_g < _g1.length) {
@@ -146,6 +174,7 @@ DragPoints.prototype = {
 					f[0](e,anchor[0]);
 				};
 			})([guide],[$bind(this,this.onMouseDown)]));
+			this.guidesElements.push(can);
 			window.document.body.appendChild(can);
 		}
 	}
@@ -165,7 +194,7 @@ DragPoints.prototype = {
 		});
 	}
 	,onMouseUp: function(e,can) {
-		haxe_Log.trace("mouse up",{ fileName : "src/PerspectiveDistort.hx", lineNumber : 180, className : "DragPoints", methodName : "onMouseUp"});
+		haxe_Log.trace("mouse up",{ fileName : "lib/PerspectiveDistort.hx", lineNumber : 191, className : "DragPoints", methodName : "onMouseUp"});
 		window.removeEventListener("mousemove",this.moving);
 	}
 	,onMove: function(e,can,anchor) {
