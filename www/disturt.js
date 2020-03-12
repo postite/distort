@@ -46,17 +46,31 @@ var DragPoints = function() {
 	this.defaultR = 15;
 	this.marginTop = 0;
 	this.marginLeft = 0;
+	this.anchorsMemo = { };
+	this.st = new tink_core_SignalTrigger();
+	this.signal = this.st;
+	this.sta = new tink_core_SignalTrigger();
+	this.memo = this.sta;
 };
 DragPoints.__name__ = true;
 DragPoints.prototype = {
 	anchors: function(parent,bounds) {
 		this.parent = parent;
-		this.bounds = bounds;
 		this.generateGuides(bounds);
+		this.initAnchorsMemo(bounds);
 		this.drawGuides();
-		this.st = new tink_core_SignalTrigger();
-		this.signal = this.st;
 		return this;
+	}
+	,load: function(anchors,parent,bounds) {
+		this.parent = parent;
+		this.anchorsMemo = anchors;
+		this.guides = [];
+		this.guides.push(DragAnchor.TopLeft(new DragPoint(anchors.topLeft.x,anchors.topLeft.y,this.defaultR)));
+		this.guides.push(DragAnchor.TopRight(new DragPoint(anchors.topRight.x,anchors.topRight.y,this.defaultR)));
+		this.guides.push(DragAnchor.BottomRight(new DragPoint(anchors.bottomRight.x,anchors.bottomRight.y,this.defaultR)));
+		this.guides.push(DragAnchor.BottomLeft(new DragPoint(anchors.bottomLeft.x,anchors.bottomLeft.y,this.defaultR)));
+		this.drawGuides();
+		this.bounds = bounds;
 	}
 	,show: function(oui) {
 		if(oui) {
@@ -75,34 +89,47 @@ DragPoints.prototype = {
 		this.signal.handle(function(p) {
 			return _gthis.modify(transform,p);
 		});
+		haxe_Timer.delay(function() {
+			_gthis.modify(transform,DragAnchor.TopLeft({ x : 100, y : 100}));
+		},1000);
 		return this;
 	}
 	,boundsof: function(elem) {
-		haxe_Log.trace(elem,{ fileName : "lib/PerspectiveDistort.hx", lineNumber : 92, className : "DragPoints", methodName : "boundsof"});
+		haxe_Log.trace(elem,{ fileName : "lib/PerspectiveDistort.hx", lineNumber : 124, className : "DragPoints", methodName : "boundsof"});
 		return { left : 0, top : 0, width : Std.parseInt(elem.style.width), height : Std.parseInt(elem.style.height)};
 	}
 	,modify: function(transform,anchor) {
-		switch(anchor._hx_index) {
-		case 0:
-			var _g3 = anchor.p;
-			transform.topLeft.x = _g3.x;
-			transform.topLeft.y = _g3.y;
-			break;
-		case 1:
-			var _g = anchor.p;
-			transform.topRight.x = _g.x;
-			transform.topRight.y = _g.y;
-			break;
-		case 2:
-			var _g2 = anchor.p;
-			transform.bottomLeft.x = _g2.x;
-			transform.bottomLeft.y = _g2.y;
-			break;
-		case 3:
-			var _g1 = anchor.p;
-			transform.bottomRight.x = _g1.x;
-			transform.bottomRight.y = _g1.y;
-			break;
+		haxe_Log.trace("modify" + Std.string(anchor),{ fileName : "lib/PerspectiveDistort.hx", lineNumber : 135, className : "DragPoints", methodName : "modify"});
+		if(anchor == null) {
+			transform.bottomRight.x = this.anchorsMemo.bottomRight.x;
+			transform.bottomRight.y = this.anchorsMemo.bottomRight.y;
+		} else {
+			switch(anchor._hx_index) {
+			case 0:
+				var _g3 = anchor.p;
+				transform.topLeft.x = _g3.x;
+				transform.topLeft.y = _g3.y;
+				this.anchorsMemo.topLeft = _g3;
+				break;
+			case 1:
+				var _g = anchor.p;
+				transform.topRight.x = _g.x;
+				transform.topRight.y = _g.y;
+				this.anchorsMemo.topRight = _g;
+				break;
+			case 2:
+				var _g2 = anchor.p;
+				transform.bottomLeft.x = _g2.x;
+				transform.bottomLeft.y = _g2.y;
+				this.anchorsMemo.bottomLeft = _g2;
+				break;
+			case 3:
+				var _g1 = anchor.p;
+				transform.bottomRight.x = _g1.x;
+				transform.bottomRight.y = _g1.y;
+				this.anchorsMemo.bottomRight = _g1;
+				break;
+			}
 		}
 		if(transform.checkError() == 0) {
 			transform.update();
@@ -117,6 +144,9 @@ DragPoints.prototype = {
 		this.guides.push(DragAnchor.TopRight(new DragPoint(b.left + b.width,b.top,this.defaultR)));
 		this.guides.push(DragAnchor.BottomRight(new DragPoint(b.left + b.width,b.top + b.height,this.defaultR)));
 		this.guides.push(DragAnchor.BottomLeft(new DragPoint(b.left,b.top + b.height,this.defaultR)));
+	}
+	,initAnchorsMemo: function(b) {
+		this.anchorsMemo = { topLeft : { x : b.left, y : b.top}, topRight : { x : b.left + b.width, y : b.top}, bottomLeft : { x : b.left, y : b.top + b.height}, bottomRight : { x : b.left + b.width, y : b.top + b.height}};
 	}
 	,hideguides: function() {
 		var _g = 0;
@@ -138,7 +168,7 @@ DragPoints.prototype = {
 	}
 	,drawGuides: function() {
 		this.guidesElements = [];
-		haxe_Log.trace("draguides",{ fileName : "lib/PerspectiveDistort.hx", lineNumber : 152, className : "DragPoints", methodName : "drawGuides"});
+		haxe_Log.trace("draguides",{ fileName : "lib/PerspectiveDistort.hx", lineNumber : 202, className : "DragPoints", methodName : "drawGuides"});
 		var _g = 0;
 		var _g1 = this.guides;
 		while(_g < _g1.length) {
@@ -194,8 +224,9 @@ DragPoints.prototype = {
 		});
 	}
 	,onMouseUp: function(e,can) {
-		haxe_Log.trace("mouse up",{ fileName : "lib/PerspectiveDistort.hx", lineNumber : 191, className : "DragPoints", methodName : "onMouseUp"});
+		haxe_Log.trace("mouse up",{ fileName : "lib/PerspectiveDistort.hx", lineNumber : 240, className : "DragPoints", methodName : "onMouseUp"});
 		window.removeEventListener("mousemove",this.moving);
+		tink_core__$Callback_CallbackList_$Impl_$.invoke(this.sta.handlers,this.anchorsMemo);
 	}
 	,onMove: function(e,can,anchor) {
 		var name = $hxEnums[anchor.__enum__].__constructs__[anchor._hx_index];
