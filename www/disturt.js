@@ -56,6 +56,7 @@ DragPoints.__name__ = true;
 DragPoints.prototype = {
 	anchors: function(parent,bounds) {
 		this.parent = parent;
+		this.bounds = bounds;
 		this.generateGuides(bounds);
 		this.initAnchorsMemo(bounds);
 		this.drawGuides();
@@ -89,9 +90,6 @@ DragPoints.prototype = {
 		this.signal.handle(function(p) {
 			return _gthis.modify(transform,p);
 		});
-		haxe_Timer.delay(function() {
-			_gthis.modify(transform,DragAnchor.TopLeft({ x : 100, y : 100}));
-		},1000);
 		return this;
 	}
 	,boundsof: function(elem) {

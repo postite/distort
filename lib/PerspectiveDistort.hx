@@ -76,7 +76,7 @@ class DragPoints {
 
 	public function anchors(parent:Element, bounds:Bounds):DragPoints {
 		this.parent = parent;
-		
+		this.bounds=bounds;
       generateGuides(bounds);
       initAnchorsMemo(bounds);
 		drawGuides();
@@ -116,7 +116,7 @@ class DragPoints {
 		var transform = new PerspectiveDistort(elem, bounds.width, bounds.height);
 
       this.signal.handle(p -> this.modify(transform, p));
-     haxe.Timer.delay( function()this.modify(transform,TopLeft(cast {x:100,y:100})),1000);
+     //haxe.Timer.delay( function()this.modify(transform,TopLeft(cast {x:100,y:100})),1000);
 		return this;
 	}
 
