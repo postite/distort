@@ -36,7 +36,7 @@ PerspectiveTransform.useDPRFix = false;
 PerspectiveTransform.dpr = 1;
 
 PerspectiveTransform.prototype = (function(){
-    console.log('transf');
+    
     var app = {
         stylePrefix: ''
     };
@@ -44,7 +44,7 @@ PerspectiveTransform.prototype = (function(){
     var _transformStyleName;
     var _transformDomStyleName;
     var _transformOriginDomStyleName;
-
+    
     var aM = [[0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0]];
     var bM = [0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -88,7 +88,9 @@ PerspectiveTransform.prototype = (function(){
     function _getDeterminant(p0, p1, p2){
         return p0.x * p1.y + p1.x * p2.y + p2.x * p0.y - p0.y * p1.x - p1.y * p2.x - p2.y * p0.x;
     }
-
+    function get_stylo(){
+        return "meme";
+    }
     // Return true if it is a concave polygon or if it is backfacing when the useBackFacing property is false. Otehrwise return true;
     function _hasPolyonError(){
         var det1 = _getDeterminant(this.topLeft, this.topRight, this.bottomRight);
@@ -114,9 +116,9 @@ PerspectiveTransform.prototype = (function(){
         if(_hasPolyonError.apply(this)) return 2; // Concave or backfacing if the useBackFacing property is false
         return 0; // no error
     }
-
+    
     function update() {
-        console.log('update');
+        
         var width = this.width;
         var height = this.height;
 
@@ -188,7 +190,7 @@ PerspectiveTransform.prototype = (function(){
         }
 
         var style = 'matrix3d(' + arr[0].toFixed(9) + ',' + arr[3].toFixed(9) + ', 0,' + arr[6].toFixed(9) + ',' + arr[1].toFixed(9) + ',' + arr[4].toFixed(9) + ', 0,' + arr[7].toFixed(9) + ',0, 0, 1, 0,' + arr[2].toFixed(9) + ',' + arr[5].toFixed(9) + ', 0, 1)';
-
+        
         //A fix for firefox on retina display, require setting PerspectiveTransform.useDPRFix to true and update the PerspectiveTransform.dpr with the window.devicePixelRatio
         if(PerspectiveTransform.useDPRFix) {
             var dpr = PerspectiveTransform.dpr;
@@ -204,7 +206,7 @@ PerspectiveTransform.prototype = (function(){
 
     app.update = update;
     app.checkError = checkError;
-
+    app.setTransformStyleName=_setTransformStyleName;
     return app;
 
 

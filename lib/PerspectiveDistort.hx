@@ -1,16 +1,14 @@
+import js.Browser;
 import js.html.AnchorElement;
 import haxe.EnumTools;
 import js.html.Element;
 import js.Browser.document as doc;
 import js.Browser.window as win;
-
+using Lambda;
 using tink.CoreApi;
 using Std;
 
-typedef Point = {
-	x:Float,
-	y:Float
-}
+import postite.geom.CoolPoint;
 
 enum DragAnchor {
 	TopLeft(p:DragPoint);
@@ -19,17 +17,20 @@ enum DragAnchor {
 	BottomRight(p:DragPoint);
 }
 
+typedef Matrice=String;
+
 @:native("PerspectiveTransform")
 extern class PerspectiveDistort {
 	var topLeft:Point;
 	var topRight:Point;
 	var bottomLeft:Point;
 	var bottomRight:Point;
-
+	var stylez:String;
 	public function new(element:js.html.Element, width:Float, height:Float, ?useBackFacing:Bool);
 
-	public function update():Void;
+	public function update():Matrice;
 	public function checkError():Int;
+
 }
 
 typedef Bounds = {
@@ -40,16 +41,17 @@ typedef Bounds = {
 }
 
 typedef AnchorMemo={
-   topLeft:Point,
+   	topLeft:Point,
 		topRight:Point,
 		bottomLeft:Point,
-		bottomRight:Point
+		bottomRight:Point,
+		matrice:Null<String>
+
 }
 
 class DragPoints {
    public var signal:tink.core.Signal<DragAnchor>;
-   public var memo:tink.core.Signal<AnchorMemo>;
-   
+   public var memo:tink.core.Signal<AnchorMemo>;  
    public var anchorsMemo:AnchorMemo = cast {};
    
 	var st:SignalTrigger<DragAnchor>;
@@ -61,7 +63,12 @@ class DragPoints {
 	var guides:Array<DragAnchor>;
 	var parent:Element;
 	var bounds:Bounds;
-	
+	var can:Element;
+	var guidesElements:Array<Element>;
+	var transform:PerspectiveDistort;
+
+	@:isVar 
+	public var matrice(get,set):String;
 
 	public function new() {
 
@@ -71,8 +78,65 @@ class DragPoints {
       sta = new SignalTrigger();
 		memo = sta.asSignal();
       
-      
-   }
+	}
+	function get_matrice():Matrice{
+		if( transform != null)
+		return transform.update();
+		return null;
+	}
+	function set_matrice(s:Matrice):Matrice{
+		
+		return this.matrice=s;
+	}
+	
+	public function clear(){
+		reset();
+		removeguides();
+		if( transform!=null){
+		removeMatrix();
+		transform=null;
+		}
+
+	}
+
+	function removeMatrix(){
+		if( can!=null)
+		can.style.transform="";
+	}
+
+
+	public function reset(){
+		var _anchors:AnchorMemo={
+		topLeft : {x: 0, y: 0},
+   	topRight : {x: bounds.width, y: 0.},
+  	 	bottomLeft :{x: 0., y: bounds.height},
+		bottomRight : {x: bounds.width, y: bounds.height},
+		matrice:null
+	}
+		//setTransform(_anchors);
+		removeMatrix();
+	}
+
+	function applyMatrice(elem:Element,mat:Matrice){
+		
+		elem.style.transform=mat;
+	}
+
+	function setTransform(_anchors:AnchorMemo){
+		if (transform !=null){
+			trace( "setTrens");
+			transform.topLeft=_anchors.topLeft;
+			transform.topRight=_anchors.topRight;
+			transform.bottomLeft=_anchors.bottomLeft;
+			transform.bottomRight=_anchors.bottomRight;
+			transform.update();
+			}
+	}
+
+	function removeguides() {
+		guides=[];
+		guidesElements.iter(n->n.remove());
+	}
 
 	public function anchors(parent:Element, bounds:Bounds):DragPoints {
 		this.parent = parent;
@@ -81,24 +145,31 @@ class DragPoints {
       initAnchorsMemo(bounds);
 		drawGuides();
 		return this;
-   }
+	}
+	
+	
    
-   public function load(anchors:AnchorMemo,parent:Element, bounds:Bounds){
+   public function load(anchors:AnchorMemo,parent:Element):DragPoints{
       this.parent = parent;
-      anchorsMemo=anchors;
-      guides=[];
+		anchorsMemo=anchors;
+		
+		this.matrice=anchorsMemo.matrice;
+		guides=[];
+		
       guides.push(TopLeft({x: anchors.topLeft.x, y: anchors.topLeft.y, r: defaultR}));
 		guides.push(TopRight({x: anchors.topRight.x, y: anchors.topRight.y, r: defaultR}));
 		guides.push(BottomRight({x: anchors.bottomRight.x, y: anchors.bottomRight.y, r: defaultR}));
 		guides.push(BottomLeft({x: anchors.bottomLeft.x, y: anchors.bottomLeft.y, r: defaultR}));
-      drawGuides();
-   //    bounds={
-   // left:anchors.topLeft.x,
-	// top:anchors.topLeft.y,
-	// width:anchors.topRight.x- anchors.topLeft.x,
-	// height:anchors.bottomRight.y- anchors.topRight.y
-   //    };//todo
-   this.bounds = bounds;
+		drawGuides();
+
+       bounds={
+   		left:anchors.topLeft.x,
+			top:anchors.topLeft.y,
+			width:anchors.topRight.x- anchors.topLeft.x,
+			height:anchors.bottomRight.y- anchors.topRight.y
+		 };//todo
+		 
+		return this;
    }
 
 	public function show(oui:Bool):DragPoints {
@@ -110,14 +181,22 @@ class DragPoints {
 	}
 
 	public function distort(elem:Element):DragPoints {
-		if (this.bounds == null)
-			this.anchors(cast elem.parentNode, boundsof(elem));
+		  if (this.bounds == null)
+		  	this.anchors(cast elem.parentNode, boundsof(elem));
 
-		var transform = new PerspectiveDistort(elem, bounds.width, bounds.height);
+			can=elem;
+			
+			applyMatrice(elem,anchorsMemo.matrice);
+			var _bounds= elem.getBoundingClientRect();
+			transform = new PerspectiveDistort(elem, _bounds.width, _bounds.height);
+		
+			//setTransform(anchorsMemo);
 
-      this.signal.handle(p -> this.modify(transform, p));
-     //haxe.Timer.delay( function()this.modify(transform,TopLeft(cast {x:100,y:100})),1000);
-		return this;
+			
+			this.signal.handle ( p -> this.modify(transform, p) );
+		
+			return this;
+
 	}
 
 	private function boundsof(elem:Element) {
@@ -161,7 +240,9 @@ class DragPoints {
 				transform.update(); // update the perspective transform
 				// elem.style.display = "block"; // show the element
 			} else {
+				trace("has error");
 				transform.checkError();
+				
 				// elem.style.display = "none"; // hide the element
 			}
 
@@ -182,7 +263,8 @@ class DragPoints {
 			topLeft: {x: b.left, y: b.top},
 			topRight: {x: b.left + b.width, y: b.top},
 			bottomLeft: {x: b.left, y: b.top + b.height},
-			bottomRight: {x: b.left + b.width, y: b.top + b.height}
+			bottomRight: {x: b.left + b.width, y: b.top + b.height},
+			matrice: null
 		}
 	}
 	function hideguides() {
@@ -195,29 +277,35 @@ class DragPoints {
 			a.style.display = "block";
 	}
 
-	var guidesElements:Array<Element>;
+	
 
 	function drawGuides() {
 		guidesElements = [];
-		trace("draguides");
+		
+		
 		for (guide in guides) {
 			var point = switch (guide) {
-				case TopLeft(point): point;
+				case TopLeft(point):
+				point;
 				case BottomLeft(point): point;
 				case TopRight(point): point;
 				case BottomRight(point): point;
 			}
-
+			var tempid:String=guide.getName().toLowerCase();
+			
 			var can = js.Browser.document.createCanvasElement();
-			can.style.position = 'absolute';
-			can.style.left = '${point.x}px';
-			can.style.top = '${point.y}px';
-			var ctx = can.getContext2d();
-			ctx.fillStyle = "#cc3300";
-			ctx.beginPath();
-			ctx.arc(point.r, point.r, point.r, 0, PI2);
-			ctx.closePath();
-			ctx.fill();
+				can.style.position = 'absolute';
+				can.classList.add("distort_anchor");
+				can.width=can.height=Std.int(point.r*2);
+				can.id=tempid;
+				can.style.left = '${point.x}px';
+				can.style.top = '${point.y}px';
+				var ctx = can.getContext2d();
+				ctx.fillStyle = "#cc3300";
+				ctx.beginPath();
+				ctx.arc(point.r, point.r, point.r, 0, PI2);
+				ctx.closePath();
+				ctx.fill();
 
 			can.addEventListener("mousedown", onMouseDown.bind(_, guide));
 			// can.addEventListener("mouseup",onMouseUp.bind(_,can));
