@@ -5,7 +5,7 @@
    "tags": ["js","drawing","geom","utils"],
    "description": "",
    "version": "0.0.4",
-   "classPath": "src/",
+   "classPath": "lib/",
    "releasenote": "init",
    "contributors": ["postite"],
    "dependencies": {
