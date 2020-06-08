@@ -5153,11 +5153,11 @@ tests_MatrixTest.prototype = $extend(utest_Test.prototype,{
 		var tabB = toTab(b);
 		var i1 = 0;
 		var _g2 = [];
-		var x1 = HxOverrides.iter(tabA);
-		while(x1.hasNext()) {
-			var x11 = x1.next();
-			utest_Assert.floatEquals(x11,tabB[i1++],0.1,null,{ fileName : "tests/MatrixTest.hx", lineNumber : 72, className : "tests.MatrixTest", methodName : "compareMatrix"});
-			_g2.push(x11);
+		var x = HxOverrides.iter(tabA);
+		while(x.hasNext()) {
+			var x1 = x.next();
+			utest_Assert.floatEquals(x1,tabB[i1++],0.1,null,{ fileName : "tests/MatrixTest.hx", lineNumber : 72, className : "tests.MatrixTest", methodName : "compareMatrix"});
+			_g2.push(x1);
 		}
 	}
 	,__initializeUtest__: function() {
